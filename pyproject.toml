@@ -1,0 +1,14 @@
+# Root pyproject: tooling config only. The actual Python packages live in subdirectories
+# (each stage gets its own env per CLAUDE.md).
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+extend-exclude = [".venv", "build", "dist"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
