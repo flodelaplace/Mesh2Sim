@@ -15,7 +15,8 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
         with:
-          enable-cache: true
+          # Cache disabled: no uv.lock yet, setup-uv requires one when caching is on.
+          enable-cache: false
 
       - name: Set up Python
         run: uv python install 3.11
@@ -38,7 +39,8 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v4
         with:
-          enable-cache: true
+          # Cache disabled: no uv.lock yet, setup-uv requires one when caching is on.
+          enable-cache: false
 
       - name: Set up Python
         run: uv python install 3.11
