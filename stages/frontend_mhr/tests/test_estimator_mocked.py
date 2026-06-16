@@ -144,10 +144,23 @@ def test_rejects_non_rgb_frame():
 
 
 # ---------------------------------------------------------------------------
-# Lazy loading is correctly stubbed
+# from_pretrained argument validation (does NOT load real weights)
 # ---------------------------------------------------------------------------
 
 
-def test_from_pretrained_not_implemented_yet():
-    with pytest.raises(NotImplementedError, match="integration ticket"):
-        FastSAM3DBodyEstimator.from_pretrained("/nonexistent/path")
+def test_from_pretrained_requires_one_source():
+    with pytest.raises(ValueError, match="either hf_repo_id OR checkpoint_dir"):
+        FastSAM3DBodyEstimator.from_pretrained()
+
+
+def test_from_pretrained_rejects_both_sources():
+    with pytest.raises(ValueError, match="not both"):
+        FastSAM3DBodyEstimator.from_pretrained(
+            checkpoint_dir="/some/dir", hf_repo_id="facebook/sam-3d-body"
+        )
+
+
+def test_from_pretrained_raises_clear_error_when_checkpoint_missing(tmp_path):
+    """If checkpoint_dir doesn't have the expected layout, fail loudly."""
+    with pytest.raises(FileNotFoundError, match="missing checkpoint artefact"):
+        FastSAM3DBodyEstimator.from_pretrained(checkpoint_dir=tmp_path)

@@ -9,6 +9,7 @@ tests without ever touching the GPU.
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Protocol
 
 import numpy as np
@@ -20,6 +21,31 @@ from .adapter import sam3db_output_to_body_estimate
 # Pinned to the vendored commit so two BodyEstimates produced by different
 # vendored SHAs are distinguishable by their estimator_id alone.
 DEFAULT_ESTIMATOR_ID = "fast-sam-3d-body@936894c"
+
+# ---------------------------------------------------------------------------
+# Expected checkpoint layout for ``from_pretrained(checkpoint_dir=...)``
+# ---------------------------------------------------------------------------
+# Mirrors the upstream HuggingFace snapshot ("facebook/sam-3d-body"-style)
+# and the user's existing FastSAM3DToOpenSim production layout:
+#
+#   <checkpoint_dir>/
+#   ├── model.ckpt                    (~2.1 GB: SAM 3D Body state_dict)
+#   ├── model_config.yaml             (~1.5 KB: model config consumed by load_sam_3d_body)
+#   └── assets/
+#       └── mhr_model.pt              (~700 MB: MHR rig TorchScript bundle)
+#
+# Optional (TensorRT acceleration, not required):
+#   └── backbone_trt/
+#       └── backbone_dinov3_fp16.engine
+#
+# Quick install pointers (do this once per machine, outside the repo):
+#   - HuggingFace download (preferred):
+#       from huggingface_hub import snapshot_download
+#       snapshot_download(repo_id="facebook/sam-3d-body", local_dir="/path/to/checkpoints")
+#   - Or use FastSAM3DToOpenSim's run-time download in setup_sam_3d_body.
+_CKPT_FILE = "model.ckpt"
+_CFG_FILE = "model_config.yaml"
+_RIG_RELPATH = ("assets", "mhr_model.pt")
 
 
 class _RawEstimator(Protocol):
@@ -65,11 +91,78 @@ class FastSAM3DBodyEstimator:
         self._raw_kwargs: dict = dict(process_one_image_kwargs or {})
 
     @classmethod
-    def from_pretrained(cls, *args, **kwargs) -> "FastSAM3DBodyEstimator":
-        """Build the estimator from pre-trained checkpoints. Not implemented yet."""
-        raise NotImplementedError(
-            "Real model loading lives in the integration ticket. Inject a "
-            "ready ``SAM3DBodyEstimator`` (or a mock) into the constructor."
+    def from_pretrained(
+        cls,
+        *,
+        checkpoint_dir: str | Path | None = None,
+        hf_repo_id: str | None = None,
+        device: str = "cuda",
+        estimator_id: str = DEFAULT_ESTIMATOR_ID,
+        main_subject_only: bool = True,
+        process_one_image_kwargs: dict | None = None,
+    ) -> "FastSAM3DBodyEstimator":
+        """Build a fully-loaded estimator from checkpoints.
+
+        Provide **either**:
+        - ``checkpoint_dir`` — path to a local sam-3d-body-dinov3 checkpoint
+          directory (see module-level docstring for the expected layout); OR
+        - ``hf_repo_id`` — HuggingFace repository id; ``snapshot_download``
+          fetches the artefacts on first call (cached afterwards). Standard
+          repo id is ``"facebook/sam-3d-body"``.
+
+        The MHR rig is loaded via ``torch.jit.load`` (the fallback path of
+        ``MHRHead`` when the optional ``mhr`` Python library is not
+        installed — which is our env by design). A benign
+        "Momentum is not enabled" warning is expected.
+
+        No human detector is wired here. Two ways to drive inference:
+        - Provide ``process_one_image_kwargs={"bboxes": np.array([[x1, y1, x2, y2]])}``
+          to pass bounding boxes manually, OR
+        - Construct the estimator yourself with a detector and inject via the
+          regular constructor (``FastSAM3DBodyEstimator(model=...)``).
+        """
+        if hf_repo_id and checkpoint_dir:
+            raise ValueError(
+                "provide either hf_repo_id OR checkpoint_dir, not both"
+            )
+        if not (hf_repo_id or checkpoint_dir):
+            raise ValueError(
+                "provide either hf_repo_id OR checkpoint_dir"
+            )
+
+        # Heavy imports deferred until from_pretrained is actually called, so
+        # ``import mesh2sim_frontend_mhr`` stays light (matters for mocked
+        # tests that don't touch the vendored core).
+        from sam_3d_body.build_models import load_sam_3d_body, load_sam_3d_body_hf
+        from sam_3d_body.sam_3d_body_estimator import SAM3DBodyEstimator
+
+        if hf_repo_id:
+            model, cfg = load_sam_3d_body_hf(hf_repo_id)
+        else:
+            ckpt_dir = Path(checkpoint_dir)  # type: ignore[arg-type]
+            ckpt_path = ckpt_dir / _CKPT_FILE
+            rig_path = ckpt_dir.joinpath(*_RIG_RELPATH)
+            cfg_path = ckpt_dir / _CFG_FILE
+            for p in (ckpt_path, rig_path, cfg_path):
+                if not p.is_file():
+                    raise FileNotFoundError(
+                        f"missing checkpoint artefact {p}; expected layout "
+                        f"is documented in mesh2sim_frontend_mhr.estimator"
+                    )
+            model, cfg = load_sam_3d_body(
+                checkpoint_path=str(ckpt_path),
+                device=device,
+                mhr_path=str(rig_path),
+            )
+
+        raw_estimator = SAM3DBodyEstimator(
+            model, cfg, human_detector=None, human_segmentor=None, fov_estimator=None
+        )
+        return cls(
+            model=raw_estimator,
+            estimator_id=estimator_id,
+            main_subject_only=main_subject_only,
+            process_one_image_kwargs=process_one_image_kwargs,
         )
 
     def estimate_frame(
