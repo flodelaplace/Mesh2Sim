@@ -1,0 +1,78 @@
+# Dockerignore for the frontend_mhr stage.
+# Build context = monorepo root (because the Dockerfile COPYs both
+# ``contracts/`` and ``stages/frontend_mhr/``).
+#
+# Goal: keep the context small and reproducible — exclude everything that's
+# not strictly needed at build time. Volumes will mount runtime artefacts
+# (checkpoints, videos, outputs) at container start.
+
+# --- Python / build hygiene -------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+build/
+dist/
+.eggs/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- Virtualenvs / local installs ------------------------------------------
+.venv/
+venv/
+env/
+.uv/
+
+# --- Editor / OS / IDE ------------------------------------------------------
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# --- VCS --------------------------------------------------------------------
+.git/
+.gitignore
+.gitattributes
+.gitmodules
+
+# --- CI / tooling configs (not needed inside the runtime container) --------
+.github/
+.pre-commit-config.yaml
+
+# --- Monorepo stages NOT relevant to the frontend image --------------------
+# Each of these has its own (incompatible) environment. Including them in
+# the frontend image's build context would bloat it and risk accidental
+# imports.
+stages/biomech_bridge/
+stages/calibration/
+stages/fusion_multiview/
+stages/targets_2d/
+stages/validation/
+orchestrator/
+golden/
+
+# --- Investigation outputs (large research artefacts) -----------------------
+stages/frontend_mhr/results/
+
+# --- Heavy runtime artefacts (mounted as volumes at run time) ---------------
+stages/frontend_mhr/checkpoints/
+stages/frontend_mhr/outputs/
+stages/frontend_mhr/inputs/
+stages/frontend_mhr/videos/
+
+# --- Docs / readmes outside the package (kept for reference, not in image) -
+docs/
+*.md
+!stages/frontend_mhr/README.md
+!stages/frontend_mhr/third_party/VENDORED.md
+!stages/frontend_mhr/third_party/LICENSE
+
+# --- Test artefacts ---------------------------------------------------------
+.tox/
+.nox/

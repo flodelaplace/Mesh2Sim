@@ -1,0 +1,41 @@
+# Conda environment for the frontend_mhr stage, dev / WSL2 side.
+#
+# Strict scope: SAM 3D Body inference (vendored under third_party/) + the
+# contracts package. NEVER install OpenSim, nimblephysics, MoGe, or any
+# downstream library here — those have their own dedicated envs.
+#
+# Create:
+#   conda env create -f environment.yml
+#   conda activate mesh2sim-frontend-mhr
+#
+# Refresh torch/cuda pins together with the production Dockerfile.
+
+name: mesh2sim-frontend-mhr
+channels:
+  - conda-forge
+  - nvidia/label/cuda-12.4.0
+dependencies:
+  - python=3.11
+  - pip
+  # conda-only: chumpy isn't reliably installable from PyPI on modern Python.
+  - chumpy
+  # GPU sanity bits
+  - numpy
+  - cython
+  - setuptools
+  - virtualenv
+  - pip:
+      # PyTorch CUDA 12.4 — pinned, must be installed BEFORE editable installs
+      # so they don't pull a CPU wheel from PyPI to satisfy the torch dep.
+      - --extra-index-url https://download.pytorch.org/whl/cu124
+      - torch==2.5.1+cu124
+      - torchvision==0.20.1+cu124
+      # TensorRT for .engine inference (optional but kept in the dev env to
+      # mirror prod — install fails fast then, not at first inference).
+      - tensorrt-cu12
+      - tensorrt-cu12-bindings
+      - tensorrt-cu12-libs
+      # Contracts package (editable from monorepo)
+      - -e ../../contracts[dev]
+      # The frontend module itself (editable, brings in the pyproject deps)
+      - -e .[dev]

@@ -1,0 +1,92 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mesh2sim-frontend-mhr"
+version = "0.0.1"
+description = "Frontend stage: wraps the vendored sam_3d_body inference and emits Mesh2Sim BodyEstimate contracts."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+authors = [{ name = "Florian Delaplace" }]
+
+# Dependencies kept verbatim with the production Dockerfile of
+# FastSAM3DToOpenSim (docker/requirements_docker.txt at the pinned vendor commit),
+# minus a few clearly-downstream libs:
+#   - vtk        : only needed by sam_3d_body/export/opensim_anatomical.py (NOT vendored)
+#   - pygltflib  : only used by GLB export, downstream stage
+#   - pyrender   : only used by sam_3d_body/visualization/ (NOT imported by the
+#                  inference path — verified via grep). The frontend stage
+#                  produces serialized BodyEstimate contracts, never draws
+#                  anything. NEVER ``import sam_3d_body.visualization`` from
+#                  this stage's code, that's the explicit discipline rule.
+# torch / torchvision / tensorrt are intentionally NOT in this list — they are
+# installed by environment.yml or Dockerfile from the PyTorch CUDA index BEFORE
+# this package is installed. Pip then sees them as satisfied and does not
+# reinstall the CPU-only wheel from PyPI.
+dependencies = [
+    # Contracts (always editable from monorepo via environment.yml / Dockerfile)
+    "mesh2sim-contracts",
+    # Inference-time deps mirrored from production requirements_docker.txt
+    "pytorch-lightning",
+    "opencv-python",
+    "yacs",
+    "scikit-image",
+    "einops",
+    "timm",
+    "rich",
+    "roma",
+    "joblib",
+    "xtcocotools",
+    "loguru",
+    "optree",
+    "fvcore",
+    "pycocotools",
+    "huggingface_hub",
+    "smplx",
+    "scipy",
+    "tqdm",
+    "pyzmq",
+    "trimesh",
+    "braceexpand",
+    "termcolor",
+    "onnx",
+    "onnxscript",
+    "onnxruntime-gpu>=1.17.0",
+    "omegaconf",
+    "ultralytics",
+    "networkx==3.2.1",
+    # chumpy comes from conda-forge (not on PyPI for modern Python); declared
+    # only as a marker — the actual install happens in environment.yml / Dockerfile.
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7",
+    "pytest-mock",
+]
+
+# ---------------------------------------------------------------------------
+# Packaging
+# ---------------------------------------------------------------------------
+# Two top-level packages are shipped from this directory:
+#   - ``mesh2sim_frontend_mhr`` (this stage's own code, under src/)
+#   - ``sam_3d_body`` (vendored vanilla from yangtiming, under third_party/)
+# Editable installs make both importable: ``src/`` and ``third_party/`` end up
+# on sys.path via the hatchling-generated .pth file.
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mesh2sim_frontend_mhr", "third_party/sam_3d_body"]
+
+[tool.hatch.build.targets.wheel.force-include]
+# Ship the vendored licence + provenance with the wheel for honest attribution.
+"third_party/LICENSE" = "sam_3d_body-vendored/LICENSE"
+"third_party/VENDORED.md" = "sam_3d_body-vendored/VENDORED.md"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Custom marker for tests that need a real GPU + downloaded checkpoints.
+markers = [
+    "gpu: integration test, requires a CUDA device and the sam_3d_body checkpoints",
+]
