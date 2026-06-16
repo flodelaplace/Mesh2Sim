@@ -86,7 +86,8 @@ packages = ["src/mesh2sim_frontend_mhr", "third_party/sam_3d_body"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# Custom marker for tests that need a real GPU + downloaded checkpoints.
+# Custom markers for tests that need external artefacts.
 markers = [
     "gpu: integration test, requires a CUDA device and the sam_3d_body checkpoints",
+    "mhr_rig: requires the mhr_model.pt rig file (CPU-loadable, no GPU needed)",
 ]
