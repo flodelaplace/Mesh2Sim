@@ -48,7 +48,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -148,7 +148,9 @@ def make_poses(rotation_indices: np.ndarray, n_poses: int) -> list[torch.Tensor]
 
 
 @torch.no_grad()
-def forward_joints(module: torch.jit.ScriptModule, mp: torch.Tensor, device: torch.device) -> np.ndarray:
+def forward_joints(
+    module: torch.jit.ScriptModule, mp: torch.Tensor, device: torch.device
+) -> np.ndarray:
     identity = torch.zeros(1, N_IDENTITY, device=device)
     face = torch.zeros(1, N_FACE_EXPR, device=device)
     _v, skel = module(identity, mp.to(device), face, False)
@@ -163,7 +165,12 @@ def parent_child_lengths(joints: np.ndarray, parents: np.ndarray) -> np.ndarray:
 
 
 def measure_effect_at_pose(
-    module, base_pose: torch.Tensor, parents: np.ndarray, indices: list[int], eps: float, device: torch.device
+    module,
+    base_pose: torch.Tensor,
+    parents: np.ndarray,
+    indices: list[int],
+    eps: float,
+    device: torch.device,
 ) -> dict[int, float]:
     ref_joints = forward_joints(module, base_pose, device)
     ref_lengths = parent_child_lengths(ref_joints, parents)
@@ -186,7 +193,7 @@ def measure_effect_at_pose(
 class Verdict:
     idx: int
     structural_label: str  # "pose_translation_dof", "pose_rotation_dof", "shape_mode",
-                           # "pure_scale", "unknown_structure"
+    # "pure_scale", "unknown_structure"
     structural_reason: str
     pose_drift_rel: float  # max |effect_pose - effect_neutral| / mean(effect)
     final: str  # "scaling_sur", "pose_dof", "a_decider"
@@ -292,9 +299,7 @@ def main() -> None:
     )
 
     # Load upstream mask
-    upstream = json.loads(
-        (args.results_dir / "scaling_mask.json").read_text(encoding="utf-8")
-    )
+    upstream = json.loads((args.results_dir / "scaling_mask.json").read_text(encoding="utf-8"))
     print(
         f"[upstream] scaling={len(upstream['scaling_indices'])}, "
         f"rotation={len(upstream['rotation_indices'])}, "
@@ -369,7 +374,9 @@ def main() -> None:
     (args.results_dir / "disambiguation.json").write_text(json.dumps(disamb, indent=2))
 
     # 5. Update scaling_mask with 3 categories
-    scaling_sur: list[int] = []   # 67 sure scalings (everything previously empirical *minus* suspects flagged pose) + suspects re-classified as scaling
+    scaling_sur: list[
+        int
+    ] = []  # 67 sure scalings (everything previously empirical *minus* suspects flagged pose) + suspects re-classified as scaling
     pose_dof: list[int] = []
     a_decider: list[int] = []
     suspects_set = set(SUSPECTS)
@@ -389,19 +396,19 @@ def main() -> None:
         "schema": "mhr_model_parameters_204_classification_v2",
         "n_params": N_MODEL_PARAMS,
         "derived_from": "scaling_mask.json (upstream empirical) + parameter_transform structure"
-                       " + pose-stability sanity check",
+        " + pose-stability sanity check",
         "categories": {
             "scaling_sur": {
                 "count": len(scaling_sur),
                 "definition": "morphological shape parameter (multi-joint coordinated translation or scale row) "
-                             "that changes parent-child distances and is pose-stable. "
-                             "Propagate to OpenSim segment scaling.",
+                "that changes parent-child distances and is pose-stable. "
+                "Propagate to OpenSim segment scaling.",
                 "indices": sorted(scaling_sur),
             },
             "pose_dof": {
                 "count": len(pose_dof),
                 "definition": "joint translation/rotation DoF — moves DURING motion. "
-                             "Must NOT be baked into segment lengths.",
+                "Must NOT be baked into segment lengths.",
                 "indices": sorted(pose_dof),
             },
             "a_decider": {
@@ -419,7 +426,9 @@ def main() -> None:
     print(
         f"\n[mask v2] scaling_sur={len(scaling_sur)}  pose_dof={len(pose_dof)}  a_decider={len(a_decider)}"
     )
-    print(f"[saved] {args.results_dir}/{{disambiguation.json, scaling_mask_v2.json, pose_stability.png}}")
+    print(
+        f"[saved] {args.results_dir}/{{disambiguation.json, scaling_mask_v2.json, pose_stability.png}}"
+    )
 
 
 if __name__ == "__main__":

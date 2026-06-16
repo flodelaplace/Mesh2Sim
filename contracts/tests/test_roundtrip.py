@@ -67,7 +67,7 @@ def test_roundtrip_biomech_fit(tmp_path, biomech_fit):
 def test_trajectory_positions_dtype_preserved(tmp_path, dtype):
     """positions has no documented cast — whatever dtype goes in must come back."""
     t, ell = 4, 3
-    names = ["r_asis", "l_asis", "r_knee_lat"]
+    names = ["RASI", "LASI", "RLFC"]
     traj = AnatomicalTrajectory(
         subject_id="S",
         trial_id="t",
@@ -80,7 +80,7 @@ def test_trajectory_positions_dtype_preserved(tmp_path, dtype):
         shape_descriptor=ShapeDescriptor(
             representation=ShapeRepresentation.opaque,
             data={"global": np.zeros(4, dtype=np.float64)},
-            source_model="Rajagopal2016",
+            source_model="Pose2Sim_Wholebody",
         ),
         views_used=["mono"],
         provenance=Provenance(),
@@ -105,7 +105,7 @@ def test_mesh_vertices_are_float32(tmp_path):
     obs = AnatomicalObservation(
         frame_id=0,
         view_id="cam0",
-        landmarks={"r_asis": Landmark()},
+        landmarks={"RASI": Landmark()},
         pos3d_frame=Pos3DFrame.none,
         dense_surface=m_in,
         capabilities=Capabilities(has_mesh=True),
@@ -150,7 +150,7 @@ def test_int_dtype_preserved_for_faces(tmp_path):
     obs = AnatomicalObservation(
         frame_id=0,
         view_id="cam0",
-        landmarks={"r_asis": Landmark()},
+        landmarks={"RASI": Landmark()},
         pos3d_frame=Pos3DFrame.none,
         dense_surface=m,
         capabilities=Capabilities(has_mesh=True),
@@ -171,7 +171,7 @@ def test_quickstart_anatomical_observation(tmp_path):
         frame_id=0,
         view_id="cam0",
         landmarks={
-            "r_asis": Landmark(
+            "RASI": Landmark(
                 pos_3d=np.array([0.1, 1.0, 0.0]),
                 confidence=0.9,
                 source=Source.bony,
@@ -183,6 +183,6 @@ def test_quickstart_anatomical_observation(tmp_path):
     )
     save(obs, tmp_path / "obs")
     back = load(AnatomicalObservation, tmp_path / "obs")
-    assert back.landmarks["r_asis"].pos_3d is not None
-    assert np.array_equal(back.landmarks["r_asis"].pos_3d, np.array([0.1, 1.0, 0.0]))
-    assert back.landmarks["r_asis"].source == Source.bony
+    assert back.landmarks["RASI"].pos_3d is not None
+    assert np.array_equal(back.landmarks["RASI"].pos_3d, np.array([0.1, 1.0, 0.0]))
+    assert back.landmarks["RASI"].source == Source.bony

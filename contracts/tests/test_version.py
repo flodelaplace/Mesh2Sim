@@ -44,7 +44,7 @@ def test_load_refuses_incompatible_major(tmp_path: Path):
     obs = AnatomicalObservation(
         frame_id=0,
         view_id="cam0",
-        landmarks={"r_asis": Landmark(pos_3d=np.array([0.0, 0.0, 0.0]))},
+        landmarks={"RASI": Landmark(pos_3d=np.array([0.0, 0.0, 0.0]))},
         pos3d_frame=Pos3DFrame.world,
         capabilities=Capabilities(),
         provenance=Provenance(),

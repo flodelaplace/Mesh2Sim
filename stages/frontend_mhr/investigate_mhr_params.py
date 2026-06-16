@@ -63,7 +63,7 @@ class Rig:
     internal_rigid_mask: np.ndarray  # (249,) bool
 
     @classmethod
-    def load(cls, path: Path, device: torch.device) -> "Rig":
+    def load(cls, path: Path, device: torch.device) -> Rig:
         module = torch.jit.load(str(path), map_location=device).eval()
         ct = module.character_torch
         parents = ct.skeleton.joint_parents.cpu().numpy().astype(np.int64)
@@ -100,9 +100,7 @@ def parent_child_lengths(joints_xyz: torch.Tensor, parents: np.ndarray) -> torch
     return diff.norm(dim=-1)
 
 
-def measure_effects(
-    rig: Rig, epsilons: list[float]
-) -> tuple[np.ndarray, np.ndarray]:
+def measure_effects(rig: Rig, epsilons: list[float]) -> tuple[np.ndarray, np.ndarray]:
     """Run the perturbation sweep.
 
     Returns:
@@ -125,9 +123,7 @@ def measure_effects(
             new_joints = rig.forward_joints(mp)
             new_lengths = parent_child_lengths(new_joints, rig.parents)
             effects[i, j] = float((new_lengths - ref_lengths).abs().sum().item())
-            joint_motion[i, j] = float(
-                (new_joints - ref_joints).norm(dim=-1).sum().item()
-            )
+            joint_motion[i, j] = float((new_joints - ref_joints).norm(dim=-1).sum().item())
     return effects, joint_motion
 
 
@@ -161,9 +157,7 @@ def classify(
     # Truly unused: joint motion stays at noise floor even at the largest ε.
     motion_last = joint_motion[:, -1]
     active_motion = motion_last[motion_last > 1e-9]
-    motion_floor = (
-        float(np.median(active_motion)) * 1e-3 if active_motion.size else 1e-9
-    )
+    motion_floor = float(np.median(active_motion)) * 1e-3 if active_motion.size else 1e-9
     unused = motion_last < motion_floor
 
     # Scaling: slope ≳ 1. Rotation: slope ≲ ~0 (noise-dominated).
@@ -218,20 +212,35 @@ def plot_classification(
         f"unused={int(cls['unused'].sum())})"
     )
     legend_handles = [
-        plt.Rectangle((0, 0), 1, 1, color="C3", label=f"empirical scaling ({int(cls['scaling'].sum())})"),
-        plt.Rectangle((0, 0), 1, 1, color="C0", label=f"empirical rotation ({int(cls['rotation'].sum())})"),
+        plt.Rectangle(
+            (0, 0), 1, 1, color="C3", label=f"empirical scaling ({int(cls['scaling'].sum())})"
+        ),
+        plt.Rectangle(
+            (0, 0), 1, 1, color="C0", label=f"empirical rotation ({int(cls['rotation'].sum())})"
+        ),
         plt.Rectangle((0, 0), 1, 1, color="C7", label=f"unused ({int(cls['unused'].sum())})"),
     ]
     ax_top.legend(handles=legend_handles, loc="upper right")
 
     # Panel 2: slope per index — the real discriminator
     ax_mid.bar(idx, slopes, color=list(colors), width=1.0)
-    ax_mid.axhline(float(cls["slope_threshold"]), color="black", linestyle="--",
-                   linewidth=0.8, label=f"slope threshold = {float(cls['slope_threshold']):.2f}")
-    ax_mid.axhline(1.0, color="gray", linestyle=":", linewidth=0.6,
-                   label="expected slope = 1 for true scaling")
-    ax_mid.axhline(0.0, color="gray", linestyle=":", linewidth=0.6,
-                   label="expected slope = 0 for pure rotation (noise)")
+    ax_mid.axhline(
+        float(cls["slope_threshold"]),
+        color="black",
+        linestyle="--",
+        linewidth=0.8,
+        label=f"slope threshold = {float(cls['slope_threshold']):.2f}",
+    )
+    ax_mid.axhline(
+        1.0, color="gray", linestyle=":", linewidth=0.6, label="expected slope = 1 for true scaling"
+    )
+    ax_mid.axhline(
+        0.0,
+        color="gray",
+        linestyle=":",
+        linewidth=0.6,
+        label="expected slope = 0 for pure rotation (noise)",
+    )
     ax_mid.set_ylabel("log-log slope d(log Σ|Δlen|) / d(log ε)")
     ax_mid.legend(loc="center right", fontsize=8)
     ax_mid.set_ylim(-0.5, 1.5)
@@ -405,7 +414,7 @@ def main() -> None:
         "n_params": N_MODEL_PARAMS,
         "epsilons_used": args.epsilons,
         "discriminator": "log-log slope of Σ|Δ‖parent-child‖| vs ε; "
-                         "true scaling has slope ≈ 1, pure rotation/rigid has slope ≈ 0 (noise)",
+        "true scaling has slope ≈ 1, pure rotation/rigid has slope ≈ 0 (noise)",
         "slope_threshold": float(cls["slope_threshold"]),
         "scaling_indices": sorted(int(i) for i in np.where(cls["scaling"])[0]),
         "rotation_indices": sorted(int(i) for i in np.where(cls["rotation"])[0]),
@@ -413,11 +422,11 @@ def main() -> None:
         "cross_check_vs_internal": xc,
     }
     (args.out_dir / "scaling_mask.json").write_text(json.dumps(mask_doc, indent=2))
-    plot_classification(
-        effects, cls, internal_scaling_204, args.out_dir / "classification.png"
-    )
+    plot_classification(effects, cls, internal_scaling_204, args.out_dir / "classification.png")
     plot_stability(effects, args.epsilons, args.out_dir / "stability.png")
-    print(f"[saved] {args.out_dir}/{{scaling_mask.json, raw_effects.npz, classification.png, stability.png}}")
+    print(
+        f"[saved] {args.out_dir}/{{scaling_mask.json, raw_effects.npz, classification.png, stability.png}}"
+    )
 
 
 if __name__ == "__main__":

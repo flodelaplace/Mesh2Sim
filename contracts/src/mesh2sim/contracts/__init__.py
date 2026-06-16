@@ -10,6 +10,9 @@ from .schemas import (
     AnatomicalTrajectory,
     BiomechFit,
     BodyEstimate,
+    CorrespondenceMap,
+    CorrespondenceMarker,
+    FrameAlignment,
 )
 from .types import (
     CameraParams,
@@ -28,10 +31,17 @@ from .types import (
 )
 from .version import SCHEMA_VERSION, check_compatible, is_compatible
 from .vocab import (
+    COORDINATES_BY_MODEL,
+    DEFAULT_MODEL_ID,
     LANDMARKS,
+    MARKER_PARENT_BODY,
+    MODELS_METADATA,
     SEGMENTS_BY_MODEL,
+    is_valid_coordinate,
     is_valid_landmark,
     is_valid_segment,
+    marker_parent_body,
+    validate_coordinate,
     validate_landmark,
     validate_segment,
 )
@@ -44,12 +54,19 @@ __all__ = [
     "check_compatible",
     "is_compatible",
     # vocab
+    "DEFAULT_MODEL_ID",
     "LANDMARKS",
     "SEGMENTS_BY_MODEL",
+    "COORDINATES_BY_MODEL",
+    "MARKER_PARENT_BODY",
+    "MODELS_METADATA",
     "is_valid_landmark",
     "is_valid_segment",
+    "is_valid_coordinate",
     "validate_landmark",
     "validate_segment",
+    "validate_coordinate",
+    "marker_parent_body",
     # enums
     "Mode",
     "Pos3DFrame",
@@ -70,6 +87,9 @@ __all__ = [
     "AnatomicalTrajectory",
     "BiomechFit",
     "BodyEstimate",
+    "CorrespondenceMap",
+    "CorrespondenceMarker",
+    "FrameAlignment",
     # io
     "NPZ_KEY",
     "load",

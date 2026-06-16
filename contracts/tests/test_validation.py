@@ -30,15 +30,15 @@ from pydantic import ValidationError
 # ---------------------------------------------------------------------------
 
 
-def test_vocab_contains_opencap_bony_landmarks():
-    # A few core bony landmarks that must be in any OpenCap-like set.
-    for must_have in ("r_asis", "l_asis", "r_knee_lat", "l_knee_lat", "c7"):
+def test_vocab_contains_pose2sim_bony_landmarks():
+    # A few core bony landmarks that must be present in the Pose2Sim model markerset.
+    for must_have in ("RASI", "LASI", "RLFC", "LLFC", "C7"):
         assert is_valid_landmark(must_have), must_have
 
 
-def test_vocab_rajagopal2016_segments():
+def test_vocab_pose2sim_wholebody_segments():
     for must_have in ("pelvis", "femur_r", "tibia_r", "calcn_r"):
-        assert is_valid_segment(must_have, "Rajagopal2016")
+        assert is_valid_segment(must_have, "Pose2Sim_Wholebody")
 
 
 def test_anatomical_observation_rejects_unknown_landmark():
@@ -67,7 +67,7 @@ def test_trajectory_rejects_unknown_landmark():
             shape_descriptor=ShapeDescriptor(
                 representation=ShapeRepresentation.opaque,
                 data={"g": np.zeros(2)},
-                source_model="Rajagopal2016",
+                source_model="Pose2Sim_Wholebody",
             ),
             views_used=["mono"],
             provenance=Provenance(),
@@ -79,7 +79,7 @@ def test_biomech_fit_rejects_unknown_marker():
         BiomechFit(
             subject_id="S",
             trial_id="t",
-            model_id="Rajagopal2016",
+            model_id="Pose2Sim_Wholebody",
             scaled_model_path="/tmp/x.osim",
             dof_names=["d0"],
             angles=np.zeros((2, 1)),
@@ -139,7 +139,7 @@ def test_anatomical_observation_capabilities_must_match():
             shape_descriptor=ShapeDescriptor(  # but present
                 representation=ShapeRepresentation.opaque,
                 data={"g": np.zeros(2)},
-                source_model="Rajagopal2016",
+                source_model="Pose2Sim_Wholebody",
             ),
             provenance=Provenance(),
         )
@@ -182,13 +182,13 @@ def test_trajectory_shape_consistency():
             task=Task.gait,
             mode=Mode.mono,
             fps=30.0,
-            landmark_names=["r_asis", "l_asis"],
+            landmark_names=["RASI", "LASI"],
             positions=np.zeros((4, 2, 3)),
             confidence=np.zeros((4, 3)),  # wrong L
             shape_descriptor=ShapeDescriptor(
                 representation=ShapeRepresentation.opaque,
                 data={"g": np.zeros(2)},
-                source_model="Rajagopal2016",
+                source_model="Pose2Sim_Wholebody",
             ),
             views_used=["mono"],
             provenance=Provenance(),
@@ -200,10 +200,10 @@ def test_biomech_fit_needs_angles_or_motion_path():
         BiomechFit(
             subject_id="S",
             trial_id="t",
-            model_id="Rajagopal2016",
+            model_id="Pose2Sim_Wholebody",
             scaled_model_path="/tmp/x.osim",
             dof_names=["d0"],
-            marker_offsets={"r_asis": np.zeros(3)},
+            marker_offsets={"RASI": np.zeros(3)},
             marker_residuals=np.zeros(4),
             provenance=Provenance(),
         )

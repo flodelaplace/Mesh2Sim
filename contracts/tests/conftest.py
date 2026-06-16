@@ -73,7 +73,9 @@ def make_skeleton(rng: np.random.Generator) -> SkeletonState:
 
 
 def make_keypoints(rng: np.random.Generator) -> Keypoints2D:
-    names = ["r_hip", "r_knee", "r_ankle"]
+    # Keypoint names are estimator-specific (e.g. SynthPose) and NOT validated against
+    # LANDMARKS — they're a separate vocabulary. Kept lowercase here on purpose.
+    names = ["rhip", "rknee", "rankle"]
     k = len(names)
     return Keypoints2D(
         names=names,
@@ -90,7 +92,7 @@ def make_shape_descriptor(rng: np.random.Generator) -> ShapeDescriptor:
             "femur_r": np.array([1.05, 1.00, 1.05], dtype=np.float64),
             "femur_l": np.array([1.04, 1.00, 1.04], dtype=np.float64),
         },
-        source_model="Rajagopal2016",
+        source_model="Pose2Sim_Wholebody",
     )
 
 
@@ -138,19 +140,19 @@ def anatomical_observation(rng: np.random.Generator) -> AnatomicalObservation:
         view_id="cam0",
         timestamp=0.0,
         landmarks={
-            "r_asis": Landmark(
+            "RASI": Landmark(
                 pos_3d=np.array([0.10, 1.00, 0.0]),
                 pos_2d=np.array([320.0, 240.0]),
                 confidence=0.95,
                 visibility=1.0,
                 source=Source.bony,
             ),
-            "l_asis": Landmark(
+            "LASI": Landmark(
                 pos_3d=np.array([-0.10, 1.00, 0.0]),
                 confidence=0.94,
                 source=Source.bony,
             ),
-            "r_knee_lat": Landmark(
+            "RLFC": Landmark(
                 pos_3d=np.array([0.12, 0.50, 0.0]),
                 confidence=0.85,
                 source=Source.soft,
@@ -162,7 +164,7 @@ def anatomical_observation(rng: np.random.Generator) -> AnatomicalObservation:
             "femur_r": np.eye(3, dtype=np.float64),
         },
         shape_descriptor=make_shape_descriptor(rng),
-        joint_centers_init={"r_hip": np.array([0.10, 0.95, 0.0])},
+        joint_centers_init={"RHJC": np.array([0.10, 0.95, 0.0])},
         dense_surface=make_mesh(rng),
         capabilities=Capabilities(
             has_mesh=True,
@@ -175,7 +177,7 @@ def anatomical_observation(rng: np.random.Generator) -> AnatomicalObservation:
 
 @pytest.fixture
 def anatomical_trajectory(rng: np.random.Generator) -> AnatomicalTrajectory:
-    names = ["r_asis", "l_asis", "r_knee_lat", "l_knee_lat"]
+    names = ["RASI", "LASI", "RLFC", "LLFC"]
     t, ell = 8, len(names)
     return AnatomicalTrajectory(
         subject_id="S001",
@@ -200,14 +202,14 @@ def biomech_fit(rng: np.random.Generator) -> BiomechFit:
     return BiomechFit(
         subject_id="S001",
         trial_id="gait_01",
-        model_id="Rajagopal2016",
+        model_id="Pose2Sim_Wholebody",
         scaled_model_path="/tmp/scaled.osim",
         dof_names=dofs,
         angles=rng.standard_normal((t, d)).astype(np.float64),
         motion_path=None,
         marker_offsets={
-            "r_asis": np.array([0.005, 0.0, 0.0]),
-            "l_asis": np.array([-0.005, 0.0, 0.0]),
+            "RASI": np.array([0.005, 0.0, 0.0]),
+            "LASI": np.array([-0.005, 0.0, 0.0]),
         },
         marker_residuals=(rng.random(t) * 0.01).astype(np.float32),
         uncertainty=(rng.random((t, d, 2)) * 0.05).astype(np.float64),

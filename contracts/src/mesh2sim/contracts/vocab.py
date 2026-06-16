@@ -1,116 +1,119 @@
-"""Frozen anatomical vocabularies.
+"""Frozen anatomical vocabularies, loaded verbatim from the bundled OpenSim model snapshot.
 
-LANDMARKS is the shared vocabulary used everywhere a landmark name appears in a contract
-(SynthPose outputs, MHR-to-anatomy correspondence map, OpenSim marker registration). It is
-inspired by the OpenCap 43-marker set (lower body focus, with upper-body and trunk
-references). Names use lowercase snake_case with side prefix ``r_`` / ``l_``.
+**No name is typed in this file.** Everything is derived from
+``contracts/src/mesh2sim/contracts/data/opensim_model.json``, which is a verbatim
+extraction from the production OpenSim model (``Pose2Sim_WithMusclesAndConstraints``).
+Case is preserved exactly: ``Abdomen`` capitalized as a body, ``RWrist_hand`` / ``LWrist_hand``
+mixed case markers, ``RFAradius`` and ``RFAulna`` both attached to ``radius_r``, etc.
 
-SEGMENTS_BY_MODEL lists the OpenSim segment names for each supported musculoskeletal model.
-The biomech bridge uses these as the targets of marker registration (scaling + offsets).
+Public surface:
+- ``LANDMARKS``                — frozen set of marker names (the 73 of the model)
+- ``SEGMENTS_BY_MODEL[model]`` — frozen set of body names per model
+- ``COORDINATES_BY_MODEL[m]``  — frozen set of coordinate names per model
+- ``MARKER_PARENT_BODY[m][n]`` — for each marker name, its parent body name (verbatim)
+- ``MODELS_METADATA[model]``   — model identity, units, axes
+- ``DEFAULT_MODEL_ID``         — slug of the production model
+
+When the OpenSim model changes: re-extract the JSON to that path and rebuild — vocab.py
+does not need editing.
 """
 
 from __future__ import annotations
 
+import json
+from collections.abc import Mapping
+from importlib.resources import files
+from types import MappingProxyType
+
+_REF_FILENAME = "opensim_model.json"
+
+
+def _load_reference() -> dict:
+    """Read the bundled OpenSim-model snapshot. Errors loudly if absent or malformed."""
+    pkg = files(__package__) / "data" / _REF_FILENAME
+    if not pkg.is_file():
+        raise FileNotFoundError(
+            f"missing reference {pkg}; the contracts package must ship the OpenSim model "
+            f"snapshot under data/{_REF_FILENAME}"
+        )
+    return json.loads(pkg.read_text(encoding="utf-8"))
+
+
+_REF = _load_reference()
+_IDENTITY = _REF["model_identity"]
+_UNITS = _REF["units_and_axes"]
+
+DEFAULT_MODEL_ID: str = _IDENTITY["slug"]
+"""Slug identifying the production OpenSim model used as default everywhere."""
+
+
 # ---------------------------------------------------------------------------
-# Landmarks (anatomical markers)
+# Bodies / segments
 # ---------------------------------------------------------------------------
 
-# Pelvis
-_PELVIS = frozenset(
-    {
-        "r_asis",
-        "l_asis",
-        "r_psis",
-        "l_psis",
-    }
+SEGMENTS_BY_MODEL: Mapping[str, frozenset[str]] = MappingProxyType(
+    {DEFAULT_MODEL_ID: frozenset(_REF["bodies"])}
 )
+"""Segment (body) names per supported OpenSim model. Keys are model slugs."""
 
-# Thigh (cluster markers)
-_THIGH = frozenset(
-    {
-        "r_thigh_1",
-        "r_thigh_2",
-        "r_thigh_3",
-        "r_thigh_4",
-        "l_thigh_1",
-        "l_thigh_2",
-        "l_thigh_3",
-        "l_thigh_4",
-    }
+
+def is_valid_segment(name: str, model_id: str = DEFAULT_MODEL_ID) -> bool:
+    """Return True iff ``name`` is a known segment for ``model_id``."""
+    segs = SEGMENTS_BY_MODEL.get(model_id)
+    return bool(segs) and name in segs
+
+
+def validate_segment(name: str, model_id: str = DEFAULT_MODEL_ID) -> None:
+    """Raise ValueError if ``name`` is not a valid segment for ``model_id``."""
+    segs = SEGMENTS_BY_MODEL.get(model_id)
+    if segs is None:
+        raise ValueError(
+            f"unknown OpenSim model_id {model_id!r}; known: {sorted(SEGMENTS_BY_MODEL)}"
+        )
+    if name not in segs:
+        raise ValueError(f"unknown segment {name!r} for model {model_id!r}; known: {sorted(segs)}")
+
+
+# ---------------------------------------------------------------------------
+# Coordinates (DoF names)
+# ---------------------------------------------------------------------------
+
+COORDINATES_BY_MODEL: Mapping[str, frozenset[str]] = MappingProxyType(
+    {DEFAULT_MODEL_ID: frozenset(c["name"] for c in _REF["coordinates"])}
 )
+"""Coordinate (DoF) names per supported model. Keys are model slugs."""
 
-# Knee
-_KNEE = frozenset(
-    {
-        "r_knee_med",
-        "r_knee_lat",
-        "l_knee_med",
-        "l_knee_lat",
-    }
+
+def is_valid_coordinate(name: str, model_id: str = DEFAULT_MODEL_ID) -> bool:
+    coords = COORDINATES_BY_MODEL.get(model_id)
+    return bool(coords) and name in coords
+
+
+def validate_coordinate(name: str, model_id: str = DEFAULT_MODEL_ID) -> None:
+    coords = COORDINATES_BY_MODEL.get(model_id)
+    if coords is None:
+        raise ValueError(
+            f"unknown OpenSim model_id {model_id!r}; known: {sorted(COORDINATES_BY_MODEL)}"
+        )
+    if name not in coords:
+        raise ValueError(f"unknown coordinate {name!r} for model {model_id!r}")
+
+
+# ---------------------------------------------------------------------------
+# Landmarks (markers)
+# ---------------------------------------------------------------------------
+
+_MARKERSET = _REF["markerset"]
+_MARKERS = _MARKERSET["markers"]
+
+LANDMARKS: frozenset[str] = frozenset(m["name"] for m in _MARKERS)
+"""Closed vocabulary of marker names. Verbatim from the bundled OpenSim markerset."""
+
+
+MARKER_PARENT_BODY: Mapping[str, Mapping[str, str]] = MappingProxyType(
+    {DEFAULT_MODEL_ID: MappingProxyType({m["name"]: m["parent_body"] for m in _MARKERS})}
 )
-
-# Shank (cluster markers)
-_SHANK = frozenset(
-    {
-        "r_shank_1",
-        "r_shank_2",
-        "r_shank_3",
-        "r_shank_4",
-        "l_shank_1",
-        "l_shank_2",
-        "l_shank_3",
-        "l_shank_4",
-    }
-)
-
-# Ankle
-_ANKLE = frozenset(
-    {
-        "r_ankle_med",
-        "r_ankle_lat",
-        "l_ankle_med",
-        "l_ankle_lat",
-    }
-)
-
-# Foot
-_FOOT = frozenset(
-    {
-        "r_calc",
-        "r_toe_1",
-        "r_toe_5",
-        "l_calc",
-        "l_toe_1",
-        "l_toe_5",
-    }
-)
-
-# Trunk
-_TRUNK = frozenset(
-    {
-        "c7",
-        "sternum_notch",
-        "sternum_xiphoid",
-    }
-)
-
-# Upper limb (kept light — full upper-body capture is not the primary use case but the names
-# exist for completeness with OpenCap-style sets)
-_UPPER = frozenset(
-    {
-        "r_acromion",
-        "l_acromion",
-        "r_humerus_lat_epicondyle",
-        "l_humerus_lat_epicondyle",
-        "r_radius_styloid",
-        "l_radius_styloid",
-        "r_ulna_styloid",
-        "l_ulna_styloid",
-    }
-)
-
-LANDMARKS: frozenset[str] = _PELVIS | _THIGH | _KNEE | _SHANK | _ANKLE | _FOOT | _TRUNK | _UPPER
-"""Closed vocabulary of anatomical landmark names. Inspired by OpenCap (43 markers)."""
+"""For each model, a name → parent_body mapping (e.g. ``RFAradius`` → ``radius_r``)."""
 
 
 def is_valid_landmark(name: str) -> bool:
@@ -120,63 +123,62 @@ def is_valid_landmark(name: str) -> bool:
 
 def validate_landmark(name: str) -> None:
     """Raise ValueError if ``name`` is not in LANDMARKS."""
-    if not is_valid_landmark(name):
+    if name not in LANDMARKS:
         raise ValueError(
             f"unknown landmark {name!r}; "
             f"see mesh2sim.contracts.vocab.LANDMARKS ({len(LANDMARKS)} entries)"
         )
 
 
+def marker_parent_body(name: str, model_id: str = DEFAULT_MODEL_ID) -> str:
+    """Look up the parent_body of a marker for a given model. Raises on unknown name."""
+    table = MARKER_PARENT_BODY.get(model_id)
+    if table is None:
+        raise ValueError(
+            f"unknown OpenSim model_id {model_id!r}; known: {sorted(MARKER_PARENT_BODY)}"
+        )
+    if name not in table:
+        raise ValueError(f"unknown marker {name!r} for model {model_id!r}")
+    return table[name]
+
+
 # ---------------------------------------------------------------------------
-# OpenSim segments per model
+# Model metadata (identity, units, axes)
 # ---------------------------------------------------------------------------
 
-# Rajagopal 2016 full-body model: lower limbs + torso + arms.
-_RAJAGOPAL2016_SEGMENTS = frozenset(
+MODELS_METADATA: Mapping[str, Mapping[str, str]] = MappingProxyType(
     {
-        "pelvis",
-        "femur_r",
-        "femur_l",
-        "tibia_r",
-        "tibia_l",
-        "talus_r",
-        "talus_l",
-        "calcn_r",
-        "calcn_l",
-        "toes_r",
-        "toes_l",
-        "torso",
-        "humerus_r",
-        "humerus_l",
-        "ulna_r",
-        "ulna_l",
-        "radius_r",
-        "radius_l",
-        "hand_r",
-        "hand_l",
+        DEFAULT_MODEL_ID: MappingProxyType(
+            {
+                "slug": _IDENTITY["slug"],
+                "model_name_verbatim": _IDENTITY["model_name_verbatim"],
+                "opensim_document_version": _IDENTITY["opensim_document_version"],
+                "derived_family": _IDENTITY["derived_family"],
+                "credits_verbatim": _IDENTITY["credits_verbatim"],
+                "publications_verbatim": _IDENTITY["publications_verbatim"],
+                "length_units": _UNITS["length_units"],
+                "force_units": _UNITS["force_units"],
+                "gravity": _UNITS["gravity"],
+                "axis_convention": _UNITS["axis_convention"],
+            }
+        )
     }
 )
-
-SEGMENTS_BY_MODEL: dict[str, frozenset[str]] = {
-    "Rajagopal2016": _RAJAGOPAL2016_SEGMENTS,
-}
-"""Segment names per supported OpenSim model. Add a new key per model as they come online."""
+"""Identity + units + axes per supported model, verbatim from the JSON snapshot."""
 
 
-def is_valid_segment(name: str, model_id: str) -> bool:
-    """Return True iff ``name`` is a known segment for ``model_id``."""
-    segs = SEGMENTS_BY_MODEL.get(model_id)
-    if segs is None:
-        return False
-    return name in segs
-
-
-def validate_segment(name: str, model_id: str) -> None:
-    """Raise ValueError if ``name`` is not a valid segment for ``model_id``."""
-    segs = SEGMENTS_BY_MODEL.get(model_id)
-    if segs is None:
-        raise ValueError(
-            f"unknown OpenSim model_id {model_id!r}; known: {sorted(SEGMENTS_BY_MODEL)}"
-        )
-    if name not in segs:
-        raise ValueError(f"unknown segment {name!r} for model {model_id!r}; known: {sorted(segs)}")
+__all__ = [
+    "COORDINATES_BY_MODEL",
+    "DEFAULT_MODEL_ID",
+    "LANDMARKS",
+    "MARKER_PARENT_BODY",
+    "MODELS_METADATA",
+    "SEGMENTS_BY_MODEL",
+    "is_valid_coordinate",
+    "is_valid_landmark",
+    "is_valid_segment",
+    "marker_parent_body",
+    "validate_coordinate",
+    "validate_landmark",
+    "validate_segment",
+]

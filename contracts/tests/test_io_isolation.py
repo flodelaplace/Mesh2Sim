@@ -48,7 +48,7 @@ def test_manifest_holds_no_large_numeric_lists(tmp_path: Path):
     obs = AnatomicalObservation(
         frame_id=0,
         view_id="cam0",
-        landmarks={"r_asis": Landmark(pos_3d=np.array([0.1, 1.0, 0.0]))},
+        landmarks={"RASI": Landmark(pos_3d=np.array([0.1, 1.0, 0.0]))},
         pos3d_frame=Pos3DFrame.world,
         dense_surface=big_mesh,
         capabilities=Capabilities(has_mesh=True),
@@ -85,7 +85,7 @@ def test_arrays_are_npz_keys_we_can_introspect(tmp_path: Path):
         frame_id=0,
         view_id="cam0",
         landmarks={
-            "r_asis": Landmark(pos_3d=np.array([0.1, 1.0, 0.0])),
+            "RASI": Landmark(pos_3d=np.array([0.1, 1.0, 0.0])),
         },
         pos3d_frame=Pos3DFrame.world,
         capabilities=Capabilities(),
@@ -96,4 +96,4 @@ def test_arrays_are_npz_keys_we_can_introspect(tmp_path: Path):
         keys = set(npz.files)
     # Landmark pos_3d should be addressable by its dotted path (paths start at the body
     # root, no envelope prefix).
-    assert "landmarks.r_asis.pos_3d" in keys
+    assert "landmarks.RASI.pos_3d" in keys

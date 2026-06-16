@@ -14,6 +14,7 @@ from __future__ import annotations
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from ._arrays import Mat3, Vec3
 from .types import (
     CameraParams,
     Capabilities,
@@ -28,7 +29,7 @@ from .types import (
     Task,
 )
 from .version import SCHEMA_VERSION
-from .vocab import validate_landmark
+from .vocab import SEGMENTS_BY_MODEL, validate_landmark
 
 _npy_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -228,7 +229,7 @@ class BiomechFit(BaseModel):
     schema_version: str = Field(default=SCHEMA_VERSION)
     subject_id: str
     trial_id: str
-    model_id: str  # e.g. Rajagopal2016, LaiUhlrich, sportfx
+    model_id: str  # slug of the OpenSim model (e.g. Pose2Sim_Wholebody)
     scaled_model_path: str
     dof_names: list[str]
     angles: np.ndarray | None = None  # (T, D) radians
@@ -280,9 +281,93 @@ class BiomechFit(BaseModel):
         return self
 
 
+# ---------------------------------------------------------------------------
+# Schéma 6: CorrespondenceMap (Mesh2Marker output — MHR vertices → OpenSim markers)
+# ---------------------------------------------------------------------------
+
+
+class FrameAlignment(BaseModel):
+    """Rigid-plus-uniform-scale alignment between MHR mesh frame and OpenSim world frame."""
+
+    model_config = _npy_config
+
+    rotation: Mat3  # (3, 3) — applied first, must be a proper rotation in practice
+    translation: Vec3  # (3,) — meters, applied after rotation
+    scale: float = 1.0  # uniform scale; non-uniform handled via shape descriptors elsewhere
+
+
+class CorrespondenceMarker(BaseModel):
+    """One entry of a CorrespondenceMap: which MHR vertices map to which OpenSim marker."""
+
+    model_config = _npy_config
+
+    name: str  # validated against LANDMARKS
+    mhr_vertices: list[int]  # MHR mesh vertex indices to regress / average for this marker
+    opensim_body: str  # validated at CorrespondenceMap level against SEGMENTS[opensim_model]
+    local_offset: Vec3  # (3,) meters, in the parent body's local frame
+    fixed: bool  # True = bony landmark (rigid attachment), False = soft tissue
+    synthpose_index: int | None = None  # cross-reference with SynthPose 2D detection layout
+
+    @field_validator("name")
+    @classmethod
+    def _check_name(cls, v: str) -> str:
+        validate_landmark(v)
+        return v
+
+    @field_validator("mhr_vertices", mode="before")
+    @classmethod
+    def _check_vertices(cls, v: object) -> list[int]:
+        if not isinstance(v, list) or not all(isinstance(i, int) and i >= 0 for i in v):
+            raise ValueError("mhr_vertices must be a list of non-negative ints")
+        if not v:
+            raise ValueError("mhr_vertices must not be empty")
+        return v
+
+
+class CorrespondenceMap(BaseModel):
+    """Frozen correspondence between MHR mesh topology and an OpenSim marker set.
+
+    Produced offline by the Mesh2Marker tool, then loaded by the biomech bridge to drive
+    per-subject scaling + IK in OpenSim. Validates that every entry references a known
+    landmark name (LANDMARKS) and a known body (SEGMENTS[opensim_model]).
+    """
+
+    model_config = _npy_config
+
+    schema_version: str = Field(default=SCHEMA_VERSION)
+    mhr_topology_id: str  # e.g. "mhr_v1"; binds the map to a specific MHR mesh topology
+    opensim_model: str  # slug — must be a key of SEGMENTS_BY_MODEL
+    marker_set: str  # human-readable identifier for the marker set version
+    frame_alignment: FrameAlignment
+    markers: list[CorrespondenceMarker]
+
+    @model_validator(mode="after")
+    def _check_model_and_bodies(self) -> CorrespondenceMap:
+        segs = SEGMENTS_BY_MODEL.get(self.opensim_model)
+        if segs is None:
+            raise ValueError(
+                f"unknown opensim_model {self.opensim_model!r}; known: {sorted(SEGMENTS_BY_MODEL)}"
+            )
+        for m in self.markers:
+            if m.opensim_body not in segs:
+                raise ValueError(
+                    f"marker {m.name!r} bound to unknown body {m.opensim_body!r} "
+                    f"in model {self.opensim_model!r}"
+                )
+        # Unique marker names — duplicates would silently drop earlier entries.
+        names = [m.name for m in self.markers]
+        if len(names) != len(set(names)):
+            dup = sorted({n for n in names if names.count(n) > 1})
+            raise ValueError(f"duplicate marker names in CorrespondenceMap: {dup}")
+        return self
+
+
 __all__ = [
     "AnatomicalObservation",
     "AnatomicalTrajectory",
     "BiomechFit",
     "BodyEstimate",
+    "CorrespondenceMap",
+    "CorrespondenceMarker",
+    "FrameAlignment",
 ]
