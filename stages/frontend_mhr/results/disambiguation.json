@@ -1,0 +1,441 @@
+{
+  "suspects": [
+    {
+      "idx": 0,
+      "structural_label": "pose_translation_dof",
+      "structural_reason": "single output: joint 1 tx (weight +10.000)",
+      "rows": [
+        {
+          "joint": 1,
+          "dof": "tx",
+          "weight": 10.0
+        }
+      ],
+      "pose_drift_rel": 0.0018499486125385406,
+      "per_pose_effects": {
+        "neutral": 0.005419254302978516,
+        "pose1": 0.00540924072265625,
+        "pose2": 0.005410194396972656
+      },
+      "final": "pose_dof"
+    },
+    {
+      "idx": 1,
+      "structural_label": "pose_translation_dof",
+      "structural_reason": "single output: joint 1 ty (weight +10.000)",
+      "rows": [
+        {
+          "joint": 1,
+          "dof": "ty",
+          "weight": 10.0
+        }
+      ],
+      "pose_drift_rel": 2.098062820451281e-05,
+      "per_pose_effects": {
+        "neutral": 1.0000019073486328,
+        "pose1": 1.000004768371582,
+        "pose2": 1.0000228881835938
+      },
+      "final": "pose_dof"
+    },
+    {
+      "idx": 2,
+      "structural_label": "pose_translation_dof",
+      "structural_reason": "single output: joint 1 tz (weight +10.000)",
+      "rows": [
+        {
+          "joint": 1,
+          "dof": "tz",
+          "weight": 10.0
+        }
+      ],
+      "pose_drift_rel": 0.00017461248120377105,
+      "per_pose_effects": {
+        "neutral": 0.005411386489868164,
+        "pose1": 0.005410441663116217,
+        "pose2": 0.0054111480712890625
+      },
+      "final": "pose_dof"
+    },
+    {
+      "idx": 62,
+      "structural_label": "pose_rotation_dof",
+      "structural_reason": "single output: joint 3 rz (weight +1.000)",
+      "rows": [
+        {
+          "joint": 3,
+          "dof": "rz",
+          "weight": 1.0
+        }
+      ],
+      "pose_drift_rel": 0.6642747643698774,
+      "per_pose_effects": {
+        "neutral": 8.393577445531264e-06,
+        "pose1": 4.037810867885128e-06,
+        "pose2": 1.431614873581566e-05
+      },
+      "final": "pose_dof"
+    },
+    {
+      "idx": 130,
+      "structural_label": "shape_mode",
+      "structural_reason": "coordinated 5 translation rows across 5 joints",
+      "rows": [
+        {
+          "joint": 37,
+          "dof": "tx",
+          "weight": 3.7100000381469727
+        },
+        {
+          "joint": 36,
+          "dof": "tx",
+          "weight": 2.2300000190734863
+        },
+        {
+          "joint": 35,
+          "dof": "tx",
+          "weight": 2.2100000381469727
+        },
+        {
+          "joint": 110,
+          "dof": "tx",
+          "weight": 1.850000023841858
+        },
+        {
+          "joint": 112,
+          "dof": "tx",
+          "weight": 1.850000023841858
+        }
+      ],
+      "pose_drift_rel": 8.820542659156611e-05,
+      "per_pose_effects": {
+        "neutral": 1.1568384170532227,
+        "pose1": 1.1569404602050781,
+        "pose2": 1.1568630933761597
+      },
+      "final": "scaling_sur"
+    },
+    {
+      "idx": 131,
+      "structural_label": "shape_mode",
+      "structural_reason": "coordinated 2 translation rows across 2 joints",
+      "rows": [
+        {
+          "joint": 113,
+          "dof": "tx",
+          "weight": 10.0
+        },
+        {
+          "joint": 111,
+          "dof": "tx",
+          "weight": 5.0
+        }
+      ],
+      "pose_drift_rel": 7.629240122385727e-06,
+      "per_pose_effects": {
+        "neutral": 1.5000306367874146,
+        "pose1": 1.5000412464141846,
+        "pose2": 1.5000191926956177
+      },
+      "final": "scaling_sur"
+    },
+    {
+      "idx": 132,
+      "structural_label": "shape_mode",
+      "structural_reason": "coordinated 6 translation rows across 2 joints",
+      "rows": [
+        {
+          "joint": 39,
+          "dof": "tx",
+          "weight": -8.359999656677246
+        },
+        {
+          "joint": 75,
+          "dof": "tx",
+          "weight": 8.359999656677246
+        },
+        {
+          "joint": 39,
+          "dof": "ty",
+          "weight": -5.440000057220459
+        },
+        {
+          "joint": 75,
+          "dof": "ty",
+          "weight": 5.440000057220459
+        },
+        {
+          "joint": 39,
+          "dof": "tz",
+          "weight": -0.6299999952316284
+        },
+        {
+          "joint": 75,
+          "dof": "tz",
+          "weight": 0.6299999952316284
+        }
+      ],
+      "pose_drift_rel": 5.147211060059763e-05,
+      "per_pose_effects": {
+        "neutral": 1.688317894935608,
+        "pose1": 1.6884047985076904,
+        "pose2": 1.6883642673492432
+      },
+      "final": "scaling_sur"
+    },
+    {
+      "idx": 133,
+      "structural_label": "shape_mode",
+      "structural_reason": "coordinated 20 translation rows across 20 joints",
+      "rows": [
+        {
+          "joint": 40,
+          "dof": "tx",
+          "weight": -5.0
+        },
+        {
+          "joint": 41,
+          "dof": "tx",
+          "weight": -5.0
+        },
+        {
+          "joint": 73,
+          "dof": "tx",
+          "weight": -5.0
+        },
+        {
+          "joint": 76,
+          "dof": "tx",
+          "weight": 5.0
+        },
+        {
+          "joint": 77,
+          "dof": "tx",
+          "weight": 5.0
+        },
+        {
+          "joint": 109,
+          "dof": "tx",
+          "weight": 5.0
+        },
+        {
+          "joint": 68,
+          "dof": "tx",
+          "weight": -4.0
+        },
+        {
+          "joint": 104,
+          "dof": "tx",
+          "weight": 4.0
+        },
+        {
+          "joint": 72,
+          "dof": "tx",
+          "weight": -3.75
+        },
+        {
+          "joint": 108,
+          "dof": "tx",
+          "weight": 3.75
+        },
+        {
+          "joint": 67,
+          "dof": "tx",
+          "weight": -3.0
+        },
+        {
+          "joint": 103,
+          "dof": "tx",
+          "weight": 3.0
+        },
+        {
+          "joint": 71,
+          "dof": "tx",
+          "weight": -2.5
+        },
+        {
+          "joint": 107,
+          "dof": "tx",
+          "weight": 2.5
+        },
+        {
+          "joint": 66,
+          "dof": "tx",
+          "weight": -2.0
+        },
+        {
+          "joint": 102,
+          "dof": "tx",
+          "weight": 2.0
+        },
+        {
+          "joint": 70,
+          "dof": "tx",
+          "weight": -1.25
+        },
+        {
+          "joint": 106,
+          "dof": "tx",
+          "weight": 1.25
+        },
+        {
+          "joint": 65,
+          "dof": "tx",
+          "weight": -1.0
+        },
+        {
+          "joint": 101,
+          "dof": "tx",
+          "weight": 1.0
+        }
+      ],
+      "pose_drift_rel": 7.776022765847179e-06,
+      "per_pose_effects": {
+        "neutral": 6.50006103515625,
+        "pose1": 6.5001115798950195,
+        "pose2": 6.500055313110352
+      },
+      "final": "scaling_sur"
+    },
+    {
+      "idx": 134,
+      "structural_label": "shape_mode",
+      "structural_reason": "coordinated 2 translation rows across 2 joints",
+      "rows": [
+        {
+          "joint": 2,
+          "dof": "tx",
+          "weight": 10.0
+        },
+        {
+          "joint": 18,
+          "dof": "tx",
+          "weight": -10.0
+        }
+      ],
+      "pose_drift_rel": 2.990766405457469e-06,
+      "per_pose_effects": {
+        "neutral": 1.953094482421875,
+        "pose1": 1.953100323677063,
+        "pose2": 1.953094482421875
+      },
+      "final": "scaling_sur"
+    },
+    {
+      "idx": 135,
+      "structural_label": "shape_mode",
+      "structural_reason": "coordinated 20 translation rows across 20 joints",
+      "rows": [
+        {
+          "joint": 3,
+          "dof": "tx",
+          "weight": 5.0
+        },
+        {
+          "joint": 4,
+          "dof": "tx",
+          "weight": 5.0
+        },
+        {
+          "joint": 17,
+          "dof": "tx",
+          "weight": 5.0
+        },
+        {
+          "joint": 19,
+          "dof": "tx",
+          "weight": -5.0
+        },
+        {
+          "joint": 20,
+          "dof": "tx",
+          "weight": -5.0
+        },
+        {
+          "joint": 33,
+          "dof": "tx",
+          "weight": -5.0
+        },
+        {
+          "joint": 12,
+          "dof": "tx",
+          "weight": 4.0
+        },
+        {
+          "joint": 28,
+          "dof": "tx",
+          "weight": -4.0
+        },
+        {
+          "joint": 16,
+          "dof": "tx",
+          "weight": 3.75
+        },
+        {
+          "joint": 32,
+          "dof": "tx",
+          "weight": -3.75
+        },
+        {
+          "joint": 11,
+          "dof": "tx",
+          "weight": 3.0
+        },
+        {
+          "joint": 27,
+          "dof": "tx",
+          "weight": -3.0
+        },
+        {
+          "joint": 15,
+          "dof": "tx",
+          "weight": 2.5
+        },
+        {
+          "joint": 31,
+          "dof": "tx",
+          "weight": -2.5
+        },
+        {
+          "joint": 10,
+          "dof": "tx",
+          "weight": 2.0
+        },
+        {
+          "joint": 26,
+          "dof": "tx",
+          "weight": -2.0
+        },
+        {
+          "joint": 14,
+          "dof": "tx",
+          "weight": 1.25
+        },
+        {
+          "joint": 30,
+          "dof": "tx",
+          "weight": -1.25
+        },
+        {
+          "joint": 9,
+          "dof": "tx",
+          "weight": 1.0
+        },
+        {
+          "joint": 25,
+          "dof": "tx",
+          "weight": -1.0
+        }
+      ],
+      "pose_drift_rel": 1.2472205933629963e-06,
+      "per_pose_effects": {
+        "neutral": 6.499432563781738,
+        "pose1": 6.499440670013428,
+        "pose2": 6.4994378089904785
+      },
+      "final": "scaling_sur"
+    }
+  ],
+  "pose_drift_tolerance": 0.05,
+  "eps": 0.1
+}
