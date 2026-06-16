@@ -14,6 +14,13 @@ name: mesh2sim-frontend-mhr
 channels:
   - conda-forge
   - nvidia/label/cuda-12.4.0
+  # ``nodefaults`` blocks conda from auto-adding the global ``defaults`` channel
+  # (which lives on ``repo.anaconda.com``). On networks that intercept TLS to
+  # ``repo.anaconda.com`` (e.g. hospital / corporate captive portals), the
+  # default channel breaks ``conda env create``. We don't need ``defaults`` for
+  # this stage anyway — everything we install comes from conda-forge, nvidia,
+  # or PyPI.
+  - nodefaults
 dependencies:
   - python=3.11
   - pip
