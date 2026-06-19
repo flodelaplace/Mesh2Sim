@@ -1,0 +1,24 @@
+# Conda environment for the anatomical_adapter stage (T3 du plan).
+#
+# Light stage: pure vertex-lookup + centroid arithmetic. CPU only, no GPU lib.
+# NEVER install OpenSim, nimblephysics, MoGe, torch, or any heavy stack here.
+#
+# Create:
+#   conda env create -f environment.yml
+#   conda activate mesh2sim-anatomical-adapter
+
+name: mesh2sim-anatomical-adapter
+channels:
+  - conda-forge
+  # nodefaults blocks the auto-injected ``defaults`` channel (repo.anaconda.com),
+  # which corporate captive portals (e.g. CHU) intercept.
+  - nodefaults
+dependencies:
+  - python=3.11
+  - pip
+  - numpy
+  - pip:
+      # Contracts package (editable from monorepo)
+      - -e ../../contracts[dev]
+      # The adapter module itself (editable, brings in pyproject deps)
+      - -e .[dev]

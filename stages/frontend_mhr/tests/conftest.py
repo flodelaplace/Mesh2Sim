@@ -42,9 +42,9 @@ def make_sam3db_person_output(
         "focal_length": np.float32(1200.0),
         "pred_cam_t": rng.standard_normal(3).astype(np.float32),
         # MHR opaque parameters.
-        "shape_params": rng.standard_normal(45).astype(np.float32),     # identity 45
-        "expr_params": rng.standard_normal(72).astype(np.float32),      # expression 72
-        "scale_params": rng.standard_normal(28).astype(np.float32),     # bone scales 28
+        "shape_params": rng.standard_normal(45).astype(np.float32),  # identity 45
+        "expr_params": rng.standard_normal(72).astype(np.float32),  # expression 72
+        "scale_params": rng.standard_normal(28).astype(np.float32),  # bone scales 28
         "global_rot": rng.standard_normal(6).astype(np.float32),
         "body_pose_params": rng.standard_normal(260).astype(np.float32),
         "hand_pose_params": rng.standard_normal(108).astype(np.float32),
@@ -55,9 +55,7 @@ def make_sam3db_person_output(
         # joint_global_rots are (J, 3, 3) per the upstream code (sliced as
         # ``[..., 78, [1, 2], :]``). We synthesise valid rotation matrices
         # (identity here) — the adapter only cares about shape/dtype.
-        "pred_global_rots": np.broadcast_to(
-            np.eye(3, dtype=np.float32), (N_JOINTS, 3, 3)
-        ).copy(),
+        "pred_global_rots": np.broadcast_to(np.eye(3, dtype=np.float32), (N_JOINTS, 3, 3)).copy(),
         # 2D keypoints (no confidence is emitted upstream).
         "pred_keypoints_2d": (rng.random((N_KP70, 2)) * 640).astype(np.float32),
         "pred_keypoints_3d": rng.standard_normal((N_KP70, 3)).astype(np.float32),
@@ -72,8 +70,12 @@ def sam3db_one_person() -> dict:
 @pytest.fixture
 def sam3db_two_people() -> list[dict]:
     """A larger and a smaller person; the larger should win main-subject selection."""
-    small = make_sam3db_person_output(seed=1, bbox=_xyxy_bbox(10.0, 10.0, 60.0, 80.0))   # area 50*70 = 3500
-    large = make_sam3db_person_output(seed=2, bbox=_xyxy_bbox(200.0, 50.0, 540.0, 460.0))  # area 340*410 = 139400
+    small = make_sam3db_person_output(
+        seed=1, bbox=_xyxy_bbox(10.0, 10.0, 60.0, 80.0)
+    )  # area 50*70 = 3500
+    large = make_sam3db_person_output(
+        seed=2, bbox=_xyxy_bbox(200.0, 50.0, 540.0, 460.0)
+    )  # area 340*410 = 139400
     return [small, large]
 
 

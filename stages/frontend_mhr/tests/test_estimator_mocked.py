@@ -20,7 +20,6 @@ from mesh2sim_frontend_mhr import (
     MeshEstimator,
 )
 
-
 # ---------------------------------------------------------------------------
 # Interface conformance
 # ---------------------------------------------------------------------------
@@ -88,6 +87,7 @@ def test_multi_person_mono_subject_picks_largest_bbox(fake_frame_rgb, sam3db_two
     # cheapest robust check: pick the same person again via the helper and
     # compare a tiny invariant (the deterministic first vertex).
     from mesh2sim_frontend_mhr.estimator import _select_main_subject
+
     expected = _select_main_subject(sam3db_two_people)
     assert np.array_equal(results[0].mesh.vertices[0], expected["pred_vertices"][0])
 

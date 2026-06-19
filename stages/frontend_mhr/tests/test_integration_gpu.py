@@ -26,10 +26,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-
-_DEFAULT_CKPT_DIR = Path(
-    "/home/fdela/FastSAM3DToOpenSim/checkpoints/sam-3d-body-dinov3"
-)
+_DEFAULT_CKPT_DIR = Path("/home/fdela/FastSAM3DToOpenSim/checkpoints/sam-3d-body-dinov3")
 
 
 def _find_checkpoint_dir() -> Path | None:
@@ -127,9 +124,16 @@ def test_real_inference_produces_conformant_body_estimate(tmp_path):
     # ---- Native params: MHR-opaque only, no pipeline leakage ---------------
     assert be.native_params is not None
     expected = {
-        "shape_params", "expr_params", "scale_params", "global_rot",
-        "body_pose_params", "hand_pose_params", "pred_pose_raw",
-        "pred_cam_t", "pred_keypoints_3d", "focal_length",
+        "shape_params",
+        "expr_params",
+        "scale_params",
+        "global_rot",
+        "body_pose_params",
+        "hand_pose_params",
+        "pred_pose_raw",
+        "pred_cam_t",
+        "pred_keypoints_3d",
+        "focal_length",
     }
     leaked = set(be.native_params) - expected
     assert not leaked, f"unexpected keys in native_params: {leaked}"
@@ -142,9 +146,7 @@ def test_real_inference_produces_conformant_body_estimate(tmp_path):
     assert back.mesh is not None
     assert back.mesh.vertices.dtype == np.float32
     assert np.array_equal(back.mesh.vertices, be.mesh.vertices)
-    assert np.array_equal(
-        back.skeleton_state.joint_positions, be.skeleton_state.joint_positions
-    )
+    assert np.array_equal(back.skeleton_state.joint_positions, be.skeleton_state.joint_positions)
     assert np.array_equal(
         back.skeleton_state.joint_orientations, be.skeleton_state.joint_orientations
     )
@@ -156,9 +158,15 @@ def test_real_inference_produces_conformant_body_estimate(tmp_path):
     print(f"  frame_shape                   : {be.frame_shape}")
     print(f"  mesh.topology_id              : {be.mesh.topology_id}")
     print(f"  mesh.vertices                 : {be.mesh.vertices.shape} {be.mesh.vertices.dtype}")
-    print(f"  skeleton.joint_positions      : {be.skeleton_state.joint_positions.shape} {be.skeleton_state.joint_positions.dtype}")
-    print(f"  skeleton.joint_orientations   : {be.skeleton_state.joint_orientations.shape} {be.skeleton_state.joint_orientations.dtype}")
-    print(f"  keypoints_2d.xy               : {be.keypoints_2d.xy.shape} {be.keypoints_2d.xy.dtype}")
+    print(
+        f"  skeleton.joint_positions      : {be.skeleton_state.joint_positions.shape} {be.skeleton_state.joint_positions.dtype}"
+    )
+    print(
+        f"  skeleton.joint_orientations   : {be.skeleton_state.joint_orientations.shape} {be.skeleton_state.joint_orientations.dtype}"
+    )
+    print(
+        f"  keypoints_2d.xy               : {be.keypoints_2d.xy.shape} {be.keypoints_2d.xy.dtype}"
+    )
     print(f"  native_params keys            : {sorted(be.native_params)}")
     for k, v in sorted(be.native_params.items()):
         if hasattr(v, "shape"):
@@ -166,4 +174,4 @@ def test_real_inference_produces_conformant_body_estimate(tmp_path):
         else:
             print(f"    {k:<25s}: {v!r}")
     print(f"  capabilities                  : {dict(be.capabilities)}")
-    print(f"  round-trip via save/load OK   : True")
+    print("  round-trip via save/load OK   : True")

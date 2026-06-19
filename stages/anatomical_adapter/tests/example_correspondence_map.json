@@ -1,0 +1,76 @@
+{
+  "_comment": "Synthetic test fixture, 7 markers representative of the calculation cases the adapter must cover. Vertex indices are arbitrary plausible values within [0, 18439) (the real MHR vertex count); they are NOT pulled from a real picking session. RLMAL is locked at vertex 17393 because the adapter test asserts it byte-exactly.",
+  "mhr_topology_id": "mhr_v1",
+  "opensim_model": "Pose2Sim_Wholebody",
+  "marker_set": "anatomical_adapter_test_fixture_v0",
+  "frame_alignment": {
+    "rotation_xxx": "identity (3x3 ones+zeros built at load time, see conftest.py)",
+    "translation": [0.0, 0.0, 0.0],
+    "scale": 1.0
+  },
+  "markers": [
+    {
+      "name": "RLMAL",
+      "mhr_vertices": [17393],
+      "opensim_body": "tibia_r",
+      "local_offset": [0.0, 0.0, 0.0],
+      "fixed": true,
+      "synthpose_index": null,
+      "_note": "bony, single vertex; adapter test pins position to vertex 17393 byte-exact"
+    },
+    {
+      "name": "LLMAL",
+      "mhr_vertices": [17215],
+      "opensim_body": "tibia_l",
+      "local_offset": [0.0, 0.0, 0.0],
+      "fixed": true,
+      "synthpose_index": null,
+      "_note": "mirror of RLMAL; bony, single vertex"
+    },
+    {
+      "name": "RFLT",
+      "mhr_vertices": [9847, 9848, 9905],
+      "opensim_body": "femur_r",
+      "local_offset": [0.0, 0.0, 0.0],
+      "fixed": false,
+      "synthpose_index": null,
+      "_note": "soft tissue (right femur lateral thigh cluster); source must be soft"
+    },
+    {
+      "name": "RWrist_hand",
+      "mhr_vertices": [12001, 12002, 12003],
+      "opensim_body": "hand_r",
+      "local_offset": [0.0, 0.0, 0.0],
+      "fixed": true,
+      "synthpose_index": null,
+      "_note": "bony, centroid of 3 vertices; adapter test asserts position == mean of these 3"
+    },
+    {
+      "name": "RASI",
+      "mhr_vertices": [3500],
+      "opensim_body": "pelvis",
+      "local_offset": [0.0, 0.0, 0.0],
+      "fixed": true,
+      "synthpose_index": null,
+      "_note": "bony, single vertex (right ASIS, pelvis)"
+    },
+    {
+      "name": "C7",
+      "mhr_vertices": [7301],
+      "opensim_body": "torso",
+      "local_offset": [0.0, 0.0, 0.0],
+      "fixed": true,
+      "synthpose_index": null,
+      "_note": "bony, single vertex (cervical 7, on torso)"
+    },
+    {
+      "name": "RCAL",
+      "mhr_vertices": [18012],
+      "opensim_body": "calcn_r",
+      "local_offset": [0.0, 0.0, 0.0],
+      "fixed": true,
+      "synthpose_index": null,
+      "_note": "bony, single vertex (right calcaneus / heel)"
+    }
+  ]
+}

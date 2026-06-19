@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Protocol
 
 import numpy as np
-
 from mesh2sim.contracts import BodyEstimate, CameraParams
 
 from .adapter import sam3db_output_to_body_estimate
@@ -100,7 +99,7 @@ class FastSAM3DBodyEstimator:
         estimator_id: str = DEFAULT_ESTIMATOR_ID,
         main_subject_only: bool = True,
         process_one_image_kwargs: dict | None = None,
-    ) -> "FastSAM3DBodyEstimator":
+    ) -> FastSAM3DBodyEstimator:
         """Build a fully-loaded estimator from checkpoints.
 
         Provide **either**:
@@ -122,13 +121,9 @@ class FastSAM3DBodyEstimator:
           regular constructor (``FastSAM3DBodyEstimator(model=...)``).
         """
         if hf_repo_id and checkpoint_dir:
-            raise ValueError(
-                "provide either hf_repo_id OR checkpoint_dir, not both"
-            )
+            raise ValueError("provide either hf_repo_id OR checkpoint_dir, not both")
         if not (hf_repo_id or checkpoint_dir):
-            raise ValueError(
-                "provide either hf_repo_id OR checkpoint_dir"
-            )
+            raise ValueError("provide either hf_repo_id OR checkpoint_dir")
 
         # Heavy imports deferred until from_pretrained is actually called, so
         # ``import mesh2sim_frontend_mhr`` stays light (matters for mocked
@@ -176,9 +171,7 @@ class FastSAM3DBodyEstimator:
     ) -> list[BodyEstimate]:
         """Run inference and convert each detected person to a ``BodyEstimate``."""
         if frame_rgb.ndim != 3 or frame_rgb.shape[2] != 3:
-            raise ValueError(
-                f"frame_rgb must be (H, W, 3); got shape {frame_rgb.shape}"
-            )
+            raise ValueError(f"frame_rgb must be (H, W, 3); got shape {frame_rgb.shape}")
 
         raw_outputs = self.model.process_one_image(frame_rgb, **self._raw_kwargs)
         if not raw_outputs:

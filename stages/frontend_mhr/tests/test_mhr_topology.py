@@ -20,7 +20,6 @@ import re
 from pathlib import Path
 
 import pytest
-
 from mesh2sim_frontend_mhr import (
     MHR_JOINT_NAMES,
     MHR_N_JOINTS,
@@ -30,7 +29,6 @@ from mesh2sim_frontend_mhr import (
     MHR_RIG_FINGERPRINT,
     MHR_TOPOLOGY_ID,
 )
-
 
 # ---------------------------------------------------------------------------
 # Tier 1: pure unit checks — invariants of the topology declaration itself
@@ -112,8 +110,7 @@ def test_rig_fingerprint_matches_locked_hashes():
     rig_path = _find_rig_path()
     if rig_path is None:
         pytest.skip(
-            "mhr_model.pt not found; set MHR_RIG_PATH or place the rig at "
-            f"{_DEFAULT_RIG_PATHS[0]}"
+            f"mhr_model.pt not found; set MHR_RIG_PATH or place the rig at {_DEFAULT_RIG_PATHS[0]}"
         )
 
     import torch  # heavy import, only for this test

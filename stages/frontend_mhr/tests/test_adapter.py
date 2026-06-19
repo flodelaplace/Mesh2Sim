@@ -103,9 +103,16 @@ def test_native_params_contains_mhr_opaque_keys(sam3db_one_person):
     be = _adapt(sam3db_one_person)
     assert be.native_params is not None
     expected = {
-        "shape_params", "expr_params", "scale_params", "global_rot",
-        "body_pose_params", "hand_pose_params", "pred_pose_raw",
-        "pred_cam_t", "pred_keypoints_3d", "focal_length",
+        "shape_params",
+        "expr_params",
+        "scale_params",
+        "global_rot",
+        "body_pose_params",
+        "hand_pose_params",
+        "pred_pose_raw",
+        "pred_cam_t",
+        "pred_keypoints_3d",
+        "focal_length",
     }
     assert set(be.native_params) == expected
 
@@ -116,8 +123,7 @@ def test_native_params_does_not_leak_pipeline_metadata(sam3db_one_person):
     assert be.native_params is not None
     forbidden = {"bbox", "mask", "lhand_bbox", "rhand_bbox"}
     assert not (forbidden & set(be.native_params)), (
-        f"pipeline metadata leaked into native_params: "
-        f"{forbidden & set(be.native_params)}"
+        f"pipeline metadata leaked into native_params: {forbidden & set(be.native_params)}"
     )
 
 
@@ -129,7 +135,7 @@ def test_native_params_excludes_none_values():
         "pred_global_rots": np.broadcast_to(np.eye(3, dtype=np.float32), (127, 3, 3)).copy(),
         "pred_keypoints_2d": np.zeros((70, 2), dtype=np.float32),
         "shape_params": np.zeros(45, dtype=np.float32),
-        "expr_params": None,            # absent in this run
+        "expr_params": None,  # absent in this run
         "scale_params": np.zeros(28, dtype=np.float32),
         "global_rot": np.zeros(6, dtype=np.float32),
         "body_pose_params": np.zeros(260, dtype=np.float32),

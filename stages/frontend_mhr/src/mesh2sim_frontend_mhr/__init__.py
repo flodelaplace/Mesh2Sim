@@ -23,6 +23,12 @@ from .mhr_topology import (
     MHR_RIG_FINGERPRINT,
     MHR_TOPOLOGY_ID,
 )
+from .shape_lock import (
+    SHAPE_LOCK_VERSION,
+    ShapeLockRegenerator,
+    aggregate_shape,
+    lock_shape_and_regenerate,
+)
 
 __version__ = "0.0.1"
 
@@ -37,5 +43,9 @@ __all__ = [
     "MHR_RIG_FINGERPRINT",
     "MHR_TOPOLOGY_ID",
     "MeshEstimator",
+    "SHAPE_LOCK_VERSION",
+    "ShapeLockRegenerator",
+    "aggregate_shape",
+    "lock_shape_and_regenerate",
     "sam3db_output_to_body_estimate",
 ]

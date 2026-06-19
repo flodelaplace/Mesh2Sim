@@ -32,11 +32,10 @@ Things deliberately NOT placed in ``BodyEstimate``:
 from __future__ import annotations
 
 import numpy as np
-
 from mesh2sim.contracts import (
     BodyEstimate,
-    Capabilities,
     CameraParams,
+    Capabilities,
     Keypoints2D,
     MeshData,
     SkeletonState,
@@ -45,7 +44,7 @@ from mesh2sim.contracts import (
 # Vendored package — re-imported here because we need the 70 keypoint names.
 from sam_3d_body.metadata.mhr70 import mhr_names as _MHR70_NAMES
 
-from .mhr_topology import MHR_JOINT_NAMES, MHR_N_JOINTS, MHR_TOPOLOGY_ID
+from .mhr_topology import MHR_JOINT_NAMES, MHR_TOPOLOGY_ID
 
 
 def _to_float32_2d_xy(arr: np.ndarray) -> np.ndarray:
@@ -166,8 +165,7 @@ def _require(output: dict, *keys: str) -> None:
     missing = [k for k in keys if k not in output or output[k] is None]
     if missing:
         raise KeyError(
-            f"SAM3DBody output is missing required keys: {missing}. "
-            f"Got keys: {sorted(output)}"
+            f"SAM3DBody output is missing required keys: {missing}. Got keys: {sorted(output)}"
         )
 
 

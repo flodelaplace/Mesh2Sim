@@ -79,13 +79,12 @@ MHR_JOINT_NAMES: list[str] = [f"mhr_joint_{i:03d}" for i in range(MHR_N_JOINTS)]
 # refresh the vendored core OR the rig file, recompute these and review the
 # entire downstream chain before accepting the change.
 
+# sha256 hex digests are 64 chars by construction — the key+value lines naturally
+# exceed 100 columns. noqa keeps them readable instead of splitting strings.
 MHR_RIG_FINGERPRINT: dict[str, str] = {
-    "joint_parents_sha256":
-        "d0938261185746968d84adb60f012d8de8719170bd65b6a3fe7a6d6389e1ab02",
-    "joint_translation_offsets_sha256":
-        "3f9a396f5c639393e8bbc86da703282d7e460249cd3233ebcdb918d5c6709e34",
-    "joint_prerotations_sha256":
-        "2b14e842e03e679cb149a9703a650bcd627d3e15921d55ab43710ad53ac7177a",
+    "joint_parents_sha256": "d0938261185746968d84adb60f012d8de8719170bd65b6a3fe7a6d6389e1ab02",
+    "joint_translation_offsets_sha256": "3f9a396f5c639393e8bbc86da703282d7e460249cd3233ebcdb918d5c6709e34",  # noqa: E501
+    "joint_prerotations_sha256": "2b14e842e03e679cb149a9703a650bcd627d3e15921d55ab43710ad53ac7177a",
 }
 """SHA-256 fingerprints of the rig's joint-enumeration buffers, locked at vendor
 pinning time. Each value is the hex digest of ``arr.tobytes()`` for the

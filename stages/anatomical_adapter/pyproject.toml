@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mesh2sim-anatomical-adapter"
+version = "0.0.1"
+description = "T3 stage: convert a per-frame BodyEstimate + CorrespondenceMap into a per-frame AnatomicalObservation (named anatomical landmarks). Pure vertex lookup, no scaling / IK / frame transform."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+authors = [{ name = "Florian Delaplace" }]
+
+# Strict perimeter — light deps only:
+# - mesh2sim-contracts: read BodyEstimate, write AnatomicalObservation, read CorrespondenceMap
+# - numpy: vertex lookup and centroid arithmetic
+# NOT here on purpose: torch, opensim, nimblephysics, any GPU lib. This stage runs CPU,
+# anywhere, and is the cheapest piece of the pipeline.
+dependencies = [
+    "mesh2sim-contracts",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mesh2sim_anatomical_adapter"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
